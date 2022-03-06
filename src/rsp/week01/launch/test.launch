@@ -1,0 +1,22 @@
+<launch>
+    <!-- <arg name="looprate" default="1"/>
+    <arg name="topicname" default="defaultname"/>
+    <param name="rate" value="$(arg looprate)" type="double"/> -->
+      <group ns="left">
+            <node pkg="week01"
+                  type="node"
+                  name="publisher_1"
+                  output="screen">
+       <!-- <param name="rate" value="1" type="double"/>
+       <remap from="headline" to="$(arg topicname)"/> -->
+            </node>
+       </group>
+       <group ns="right">  
+            <node pkg="week01"
+                  type="node"
+                  name="publisher_2"
+                  output="screen">
+            </node>
+      </group>
+
+</launch>

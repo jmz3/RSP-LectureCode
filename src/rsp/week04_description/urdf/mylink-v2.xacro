@@ -1,0 +1,15 @@
+<robot name="mylink" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+    <xacro:macro name="mylink" params="link_name">
+        <link name="${link_name}">
+            <visual>
+                <origin xyz="0 0 0.5" rpy="0 0 0"/>
+                <geometry>
+                    <box size="0.1 0.1 1"/>
+                </geometry>
+            </visual>
+        </link>
+    </xacro:macro>
+<!-- instead of repeating same code for different links, we can reuse the code like above -->
+
+</robot>

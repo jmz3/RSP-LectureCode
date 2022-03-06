@@ -1,0 +1,17 @@
+<robot name="simple"  xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+    <xacro:include filename="$(find week04_description)/urdf/mylink-v2.xacro"/>
+    <xacro:macro name="myrobot" params="robot_name">
+        <xacro:mylink link_name="${robot_name}_world"/>
+        <xacro:mylink link_name="${robot_name}_tool"/>
+
+        <joint name="${robot_name}_q1" type="revolute">
+            <origin xyz="0 0 1" rpy=" 0 0 0"/>
+            <parent link="${robot_name}_world"/>
+            <child link="${robot_name}_tool"/>
+
+            <axis xyz="0 1 0"/>
+            <limit lower="-1" upper="1" effort="1" velocity="1"/>
+        </joint>
+    </xacro:macro>
+</robot>

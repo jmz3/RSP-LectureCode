@@ -1,0 +1,5 @@
+my_action/MyGoal goal
+---
+my_action/MyResult result
+---
+my_action/MyFeedback feedback

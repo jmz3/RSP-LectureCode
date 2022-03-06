@@ -1,0 +1,26 @@
+<robot name="simple"
+    xmlns:xacro="http://www.ros.org/wiki/xacro">
+    <xacro:include filename="$(find week04_description)/urdf/simple_robot.xacro"/>
+
+    <xacro:myrobot robot_name="r1"/>
+    <xacro:myrobot robot_name="r2"/>
+    <xacro:myrobot robot_name="r3"/>
+
+    <link name="world"/>
+    <joint name="r1" type="fixed">
+        <origin xyz="1 0 0" rpy="0 0 0"/>
+        <parent link="world"/>
+        <child link="r1_world"/>
+    </joint>
+    <joint name="r2" type="fixed">
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <parent link="r1_tool"/>
+        <child link="r2_world"/>
+    </joint>
+    <joint name="r3" type="fixed">
+        <origin xyz="1 1 0" rpy="0 0 0"/>
+        <parent link="world"/>
+        <child link="r3_world"/>
+    </joint>
+
+</robot>
