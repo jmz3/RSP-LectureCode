@@ -1,0 +1,34 @@
+<?xml version="1.0"?>
+<launch>
+    <arg name="paused" default="true"/>
+    <arg name="uwsim" default="false"/>
+
+    <!-- Launch Gazebo with underwater world -->
+    <include file="$(find gazebo_ros)/launch/empty_world.launch">
+        <arg name="gui" value="false" if="$(arg uwsim)"/>
+        <arg name="paused" value="$(arg paused)"/>
+        <arg name="world_name" value="$(find freefloating_gazebo)/world/underwater.world"/>
+    </include>
+  
+    <!-- include gazebo spawner (generated while parsing uwsim launcher) -->
+    <group ns="auv">
+        <param name="robot_description" command="$(find xacro)/xacro.py $(find ecn_sonar)/urdf/auv_block.xacro"/>
+        <node name="spawner" pkg="gazebo_ros" type="spawn_model" respawn="false" output="screen" args="-urdf -model auv -param robot_description -x 0 -y 0 -z 1 -R 0 -P 0 -Y 0"/>
+
+        <!-- Load controller configurations (vehicle and arm) from YAML file to parameter server -->
+        <rosparam file="$(find ecn_rasom)/config/auv_control.yaml" command="load"/>
+  
+        <!-- Launch low-level PID control for body and arm -->
+        <node name="pid_control" pkg="freefloating_gazebo" type="pid_control" output="screen" respawn="true"/>
+    </group>
+    
+    
+    <param name="terrain_description" command="$(find xacro)/xacro.py $(find ecn_rasom)/urdf/terrain.sdf"/>
+    <node name="terrain_spawner" pkg="gazebo_ros" type="spawn_model" respawn="false" output="screen" args="-sdf -model terrain -param terrain_description -x 0 -y 0 -z 0 -R 0 -P 0 -Y 0"/>
+    
+    <!-- some containers -->
+    <param name="container_description" command="$(find xacro)/xacro.py $(find ecn_sonar)/urdf/container.sdf"/>
+    <node name="container_spawner" pkg="gazebo_ros" type="spawn_model" respawn="false" output="screen" args="-sdf -model cont1 -param container_description -z -13.5 -R 1.5"/>
+    <node name="container_spawner2" pkg="gazebo_ros" type="spawn_model" respawn="false" output="screen" args="-sdf -model cont2 -param container_description -x -5 -z -13.5 -R 1.5 -P -.5"/>
+    <node name="container_spawner3" pkg="gazebo_ros" type="spawn_model" respawn="false" output="screen" args="-sdf -model cont3 -param container_description -y 10 -z -12.5 -R -1.5 -Y -.5"/>
+</launch>

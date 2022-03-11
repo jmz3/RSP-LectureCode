@@ -1,0 +1,4 @@
+<?xml version="1.0"?>
+<launch>
+	<node name="display_node" pkg="ecn_sonar" type="display_block"/>
+</launch>
