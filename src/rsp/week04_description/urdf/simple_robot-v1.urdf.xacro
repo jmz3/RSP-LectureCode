@@ -2,7 +2,7 @@
 
     <xacro:include filename="$(find week04_description)/urdf/mylink.xacro"/>
     <xacro:worldlink/>
-    <xacro:toollink/>
+    <!-- <xacro:toollink/>
 
     <joint name="q1" type="revolute">
         <origin xyz="0 0 0.5" rpy=" 0 0 0"/>
@@ -11,5 +11,5 @@
 
         <axis xyz="0 0 1"/>
         <limit lower="-1" upper="1" effort="1" velocity="1"/>
-    </joint>
+    </joint> -->
 </robot>

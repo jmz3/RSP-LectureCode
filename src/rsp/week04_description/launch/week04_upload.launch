@@ -2,6 +2,6 @@
     <arg name="robot_name" default="robot"/>
     <group ns="$(arg robot_name)">
         <param name="robot_description" 
-        command="$(find xacro)/xacro --inorder '$(find week04_description)/urdf/simple_robot-v4.urdf.xacro' robot_name:=$(arg robot_name)"/>
+        command="$(find xacro)/xacro --inorder '$(find week04_description)/urdf/simple_robot-v1.urdf.xacro' robot_name:=$(arg robot_name)"/>
     </group>
 </launch>

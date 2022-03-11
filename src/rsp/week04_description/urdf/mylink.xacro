@@ -5,26 +5,26 @@
         <link name="world">
             <inertial>
                 <mass value="1"/>
-                <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+                <origin xyz="0 0 0" rpy="0 0 0"/>
                 <inertia ixx="1" ixy="0.0" ixz="0.0" iyy="1" iyz="0.0" izz="1"/>
             </inertial>
             <visual>
                 <origin xyz="0 0 0.5" rpy="0 0 0"/>
                 <geometry>
-                    <box size="0.1 0.1 1"/>
+                    <box size="0.4 0.4 1"/>
                 </geometry>
             </visual>
             <collision>
-                <origin xyz="0.0 0.0 -0.5" rpy="0.0 0.0 0.0"/>
+                <origin xyz="0 0 0.5" rpy="0 0 0"/>
                 <geometry>
-                    <box size="0.4 0.4 1"/>
+                    <box size="0.5 0.5 1.5"/>
                 </geometry>
             </collision>
         </link>
     </xacro:macro>
     <!-- instead of writing same code for different links, we can reuse the code like above -->
 
-    <xacro:macro name="toollink">
+    <!-- <xacro:macro name="toollink">
         <link name="tool">
             <visual>
                 <origin xyz="0 0 -0.5" rpy="0 0 0"/>
@@ -33,5 +33,5 @@
                 </geometry>
             </visual>
         </link>
-    </xacro:macro>
+    </xacro:macro> -->
 </robot>
