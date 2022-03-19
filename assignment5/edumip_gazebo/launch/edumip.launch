@@ -1,0 +1,17 @@
+<launch>
+
+    <node
+        pkg="gazebo_ros" type="gazebo" name="gazebo"
+        args="$(find edumip_gazebo)/worlds/tot.world">
+    </node>
+
+    <include file="$(find edumip_description)/launch/edumip_startup.launch"/>
+
+    <node
+        pkg="gazebo_ros" type="spawn_model" name="spawn_edumip"
+        args="-urdf -param robot_description -model edumip">
+    </node>
+
+    <node name="rviz" type="rviz" pkg="rviz" args="-d $(find edumip_description)/rviz/edumip.rviz"/>
+
+</launch>
