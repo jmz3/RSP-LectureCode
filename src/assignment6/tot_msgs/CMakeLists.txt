@@ -103,7 +103,7 @@ generate_messages(
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES tot_msgs
-   CATKIN_DEPENDS std_msgs
+   CATKIN_DEPENDS std_msgs message_runtime
 #  DEPENDS system_lib
 )
 

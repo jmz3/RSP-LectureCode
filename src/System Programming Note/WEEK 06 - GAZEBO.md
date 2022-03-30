@@ -283,7 +283,21 @@ $ gzserver # this will not create a node in ros
 $ rosrun gazebo_ros gzserver # You can only have gazebo known by ROS through this command
 ```
 
+### Where are the worlds located?
 
+You may have noticed the mysterious `worlds/pioneer2dx.world` argument in the above command. This instructs gazebo to find the `pioneer2dx.world` file, and load it on start.
+
+World files are located in a versioned system directory, for example `/usr/share/gazebo-7` on Ubuntu.  If you have Gazebo 7.0 installed on Ubuntu, in a terminal type the following to see a complete list of worlds.
+
+```
+ls /usr/share/gazebo-7/worlds
+```
+
+For a Gazebo 7.0 installation on OS X using Homebrew, type the following to see a complete list of worlds.
+
+```
+ls /usr/local/share/gazebo-7/worlds
+```
 
 # II. C++ for gazebo plugin
 
@@ -356,9 +370,15 @@ namespace gazebo{
 
         parent = _model;
         world = _model->GetWorld(); // That's how you manage to fetch the model and world geometry information from those pointers.
+        gazebo_ros = GazeboRosPtr( new GazeboRos( _model, _sdf, "wrench_apply" ));
+        gazebo_ros->isInitialized();
+
+        std::cout << _model->GetName() << std::endl;
+        std::cout << _sdf->GetName() << std::endl;
+        std::cout << _sdf->HasElement("topic") <<std::endl; // _sdf gives you access to view and modify the things that are created in the <gazebo> label inside the urdf
         
         std::string topicname;
-        gazebo_ros->getParameter<std::string>(topicname, "topic", "defaultname");
+        gazebo_ros->getParameter<std::string>(topicname, "topic", "defaultname"); // pass parameter from this function such that you don't have to hardcode the topicname
 
         publisher = gazebo_ros->node()->advertise<std_msgs::String>(topicname,10);
 
@@ -368,12 +388,12 @@ namespace gazebo{
 
     void wrench_apply_plugin::callback1(){
     
-        physics::Model_V vm = world->Models();// You can get access the Models listed in gazebo through this command
+        physics::Model_V vm = world->Models();// You can get access the Models listed in gazebo through this command in Gazebo 7, the member function is called as GetModels
     
         for( int i=0; i<vm.size(); i++){
             std_msgs::String name;
             name.data = vm[i]->GetName();
-            publisher.publish(name);
+            publisher.publish(name);// publish what you just get from the model pointer
 
         }
     }
@@ -505,3 +525,16 @@ $ rosrun gazebo_ros spawn_model -urdf -param robot_description -model jzhan -x 5
 $ rosservice call /gazebo/delete_model "model_name: 'jzhan'" # will delete a existing model in gazebo
 ```
 
+If you wanna build a bridge between gazebo and ros, the only way is through gazebo plugins. There is no other way around
+
+
+
+```bash
+$ rosservice call /gazebo/reset_world # can restart the simulation
+```
+
+
+
+## 2.6 In the end...
+
+Gazebo is not that complcated, it only provides some visualization process and it allows users to play with it through plugins. The math is actually done by the engine, not gazebo. Gazebo acts like a agent.

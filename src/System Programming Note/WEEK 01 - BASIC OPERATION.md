@@ -42,9 +42,11 @@ rosnode/rostopic/rosservice/rosmsg list | grep somename
 	**have to be done everytime you open a new terminal**
 	source this file will automatically source the root bash file
 
-### pub = nh.advertise<std_msgs::String>("headline",10);
+```cpp
+pub = nh.advertise<std_msgs::String>("headline",10); //here 10 is a buffer, means we can save the past 10 msgs that has been advertised
+```
 
-	here 10 is a buffer, means we can save the past 10 msgs that has been advertised
+
 
 catkin clean :
 	clean all the stuff that has been created by catkin build
@@ -91,9 +93,11 @@ catkin clean :
 
 ### 3 useful command to debug rosnode:
 
-	rosnode list: find the node name
-	rosnode ping: test the node
-	rosnode info:
+```bash
+$ rosnode list: find the node name
+$ rosnode ping: test the node
+$ rosnode info:
+```
 
 ### rostopic is another useful tool:
 
@@ -156,4 +160,30 @@ you can set a default value like <arg name="looprate" default="1"/> to ensure it
 ### for assignment1 make sure all the dependency are good
 
 if sub packages are dependent to each other, directly catkin build will fail since only one cmake file is executed bu other packages are not built, so you have to change the build command at the bottom of package.xml file to tell catkin prebuild the dependencies
-	
+
+
+
+# ROS service
+
+.srv file is alike to .msg file,srv files are just like msg files, except they  contain two parts: a request and a response.  The two parts are  separated by a '---' line. Here is an example of a srv file: 
+
+```yaml
+int64 A
+int64 B
+---
+int64 Sum
+```
+
+
+
+
+# UR package on Melodic
+
+https://github.com/UniversalRobots/Universal_Robots_ROS_Driver
+
+```bash
+[elbow_joint, shoulder_lift_joint, shoulder_pan_joint, wrist_1_joint, wrist_2_joint,
+  wrist_3_joint]
+```
+
+The ur packages use a strange order of joints however like [ 3 2 1 4 5 6 ] keep that in mind to avoid some mistakes
