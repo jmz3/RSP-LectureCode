@@ -1,1 +1,0 @@
-Plugin for balancing, driving, and steering EduMIP in Gazebo.
