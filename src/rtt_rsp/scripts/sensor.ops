@@ -1,0 +1,31 @@
+import("rtt_ros")
+import("rtt_rosnode")
+import("rtt_roscomm")
+import("rtt_geometry_msgs")
+import("rtt_sensor_msgs")
+import("kdl_typekit")
+import("rtt_rsp")
+
+loadComponent("sensor", "rtt_sensor")
+setActivity("sensor", 1, 0, ORO_SCHED_OTHER ) // set the sensor frequency at 1 Hz
+
+loadComponent("robot", "rtt_robot")
+setActivity("robot", 0.01, 0, ORO_SCHED_OTHER )
+
+var ConnPolicy cp
+connect( "robot.MsrWrench", "sensor.MsrWrench", cp)
+
+stream( "sensor.MsrWrench", ros.topic("/sensor/wrench"))
+stream( "robot.MsrJntPos", ros.topic("/robot/joint_state"))
+stream( "robot.CmdCartPos", ros.topic("/robot/command"))
+
+
+sensor.configure()
+sensor.start()
+
+robot.robot_description = "robot_description"
+robot.base = "base"
+robot.tool = "tool0"
+
+robot.configure()
+robot.start()

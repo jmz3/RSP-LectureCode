@@ -1,0 +1,20 @@
+<launch>
+    <arg name="velocity_interface" default="false" />
+    <include file="$(find gazebo_ros)/launch/empty_world.launch">
+        <arg name="world_name" default="worlds/empty.world" />
+    </include>
+
+    <include file="$(find ur_description)/launch/load_ur5.launch">
+        <arg name="transmission_hw_interface" default="hardware_interface/$(arg interface)JointInterface" />
+    </include>
+
+    <node pkg="gazebo_ros" type="spawn_model" name="spawn_model" args="-urdf -param robot_description -model robot -z 0.1" output="screen" />
+
+    <rosparam command="load" file="$(find ur_velocity_interface)/controllers/joint_state_control.yaml" />
+    <node pkg="controller_manager" type="controller_manager" name="joint_state_controller_spawner" args="spawn joint_state_controller" output="screen" />
+
+    <node pkg="controller_manager" type="controller_manager" name="joint_state_controller_spawner" args="spawn joint_state_controller" output="screen" />
+    <node pkg="controller_manager" type="controller_manager" name="joint_state_controller_spawner" args="spawn joint_state_controller" output="screen" />
+    <node pkg="controller_manager" type="controller_manager" name="joint_state_controller_spawner" args="spawn joint_state_controller" output="screen" />
+
+</launch>

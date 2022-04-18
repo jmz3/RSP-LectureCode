@@ -1,0 +1,8 @@
+<launch>
+    <include file="$(find ur_gazebo)/launch/ur5_bringup.launch">
+        <arg name="stopped_controllers" value="pos_joint_traj_controller" />
+        <arg name="controllers" value="joint_state_controller joint_group_pos_controller" />
+    </include>
+
+    <node pkg="rtt_ros" type="deployer" name="deployer" args="-s $(find assignment8)/scripts/robot.ops" output="screen" />
+</launch>

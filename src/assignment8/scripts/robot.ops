@@ -1,0 +1,23 @@
+import("rtt_ros")
+import("rtt_rosnode")
+import("rtt_roscomm")
+import("rtt_geometry_msgs")
+import("rtt_std_msgs")
+import("kdl_typekit")
+import("assignment8")
+
+loadComponent("robot", "rtt_reflexxes")
+setActivity("robot", 0.01, 0, ORO_SCHED_OTHER)
+
+robot.robot_description = "robot_description"
+robot.base = "base"
+robot.tool = "tool0"
+
+stream( "robot.Output_Port", ros.topic("/joint_group_pos_controller/command"))
+
+robot.configure()
+robot.start()
+
+var KDL.JntArray q=robot.GetJointPos()
+robot.SetJointPos( q )
+

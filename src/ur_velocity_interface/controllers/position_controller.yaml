@@ -1,0 +1,9 @@
+joint_group_position_controller:
+        type: position_controllers/JointGroupPositionController
+        joints:
+          - shoulder_pan_joint
+          - should_lift_joint
+          - elbow_joint
+          - wirst_1_joint
+          - wirst_2_joint
+          - wirst_3_joint

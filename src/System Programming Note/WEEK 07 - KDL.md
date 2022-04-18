@@ -74,9 +74,9 @@ NR_JL: newton raphson method with joint limits
 
 # II. CPP code
 
-## 2.1 resolve rate control package:
+## 2.1 resolve rate control (RRMC) package:
 
-rrmc.hpp:
+### rrmc.hpp:
 
 ```cpp
 #include <ros/ros.h>
@@ -137,12 +137,27 @@ This class encapsulates a **tree** kinematic interconnection structure. It is bu
 
   
 
-in the rrmc.cpp file:
+### rrmc.cpp file:
 
 ```cpp
 #include <rrmc/rrmc.hpp>
+#include <std_msgs/Float64MultiArray.h>
+
 
 RRMC::RRMC( ros::NodeHandle& nh): nh(nh){
+
+    sub_vw = nh.subscribe("cmd_vel", 10, &RRMC::callback_vw, this); 
+    /*
+    when dealing with twist it's common to name twist as cmd_vel, 10 is the buffer
+    the point of subscribe is that it binds the callback function and this class together and 
+    it allows you to listen constantly to the topic you specified without getting stuck at this line of code
+    in other words, the other part of this class can run independently even though this nh.subscribe is running
+    Through this callback, we put what we get from cmd_vel to the parameter we defined for the callback_vw
+    Here we define the parameter as a "const geometry_msgs::Twist& vw", that means we put whatever we got into that parameter
+    So you gotta make sure the parameter you defined matches the type that you want to subtract 
+    */
+    sub_js = nh.subscribe("joint_states", 10, &RRMC::callback_js, this);
+    pub_qd = nh.advertise<std_msgs::Float64MultiArray >("command",10);
 
     std::string robot_description_string; 
     nh.param( "robot_description", robot_description_string, std::string() );
@@ -150,9 +165,11 @@ RRMC::RRMC( ros::NodeHandle& nh): nh(nh){
     if( kdl_parser::treeFromString( robot_description_string, tree )){// we want to build a tree from the string 
     // ang through this command we can do it and assign the value to the tree object
 
-        if ( tree.getChain( "base", "tool0", ))
+        if ( tree.getChain( "base", "tool0", chain))
         {
-            ik_vel = new KDL::ChainIkSolverVel_pinv( chain ); // if you dont use the new pointer to create a object here, you will need to instantiate a ik_vel object at the beginning right next to nh(nh)
+            ik_vel = new KDL::ChainIkSolverVel_pinv( chain ); // if you dont use the new pointer to 
+            // create a object here, you will need to instantiate a ik_vel object at the beginning right next to nh(nh)
+            // and again ik_vel will get the joint velocities through inverse jacobian 
         }
         else{
             ROS_ERROR("cannot get a chain");
@@ -164,7 +181,50 @@ RRMC::RRMC( ros::NodeHandle& nh): nh(nh){
 
 }
 
-RRMC::~RRMC(){};
+RRMC::~RRMC(){ if( ik_vel) delete ik_vel; }
+
+// Here are the callback functions :
+
+void RRMC::callback_vw( const geometry_msgs::Twist& vw){
+
+    std::cout << vw << std::endl;
+    this->vw = vw;
+}
+
+void RRMC::callback_js( const sensor_msgs::JointState& js){
+
+    KDL::JntArray q_in( js.position.size()); // give the joint_array a right size by fetching the size from js
+    for( int i = 0; i < q_in.rows(); i++){
+
+        q_in(i) = js.position[i]; // get joint positions and put it into a Jntarray, here we just ignore the wrong order of 
+    } // KDL::JntArray is a class that can contain all the joint positions into one vector
+
+    KDL::Twist kdl_vw;
+    kdl_vw.vel.x( vw.linear.x );
+    kdl_vw.vel.y( vw.linear.y );
+    kdl_vw.vel.z( vw.linear.z );
+
+    kdl_vw.rot.x( vw.angular.x );
+    kdl_vw.rot.y( vw.angular.y );
+    kdl_vw.rot.z( vw.angular.z );// donot expect kdl to automatically resize 
+
+    KDL::JntArray qd_out( js.position.size() ); // qd_out here means the derivative of joint states, in other words, it's joint velovity
+    // always remember to give the JntArray object a size otherwise the program will crash cause KDL would automatically do that for you
+    
+    ik_vel->CartToJnt(  q_in, kdl_vw, qd_out);// here we call the member fuction and have the joint velocities stored in the qd_out
+    //the next step should be publish these "number" to ros
+
+    std_msgs::Float64MultiArray msg_qd; // multiarray is the type that topic /joint_group_position accepts
+    msg_qd.layout.dim.push_back( std_msgs::MultiArrayDimension() );
+    msg_qd.layout.dim[0].stride = 1; // specify how many dimensions you need for this multidimensional array
+    msg_qd.layout.data_offset = 0;
+
+    for( int i = 0; i<qd_out.rows()  ; i++){
+
+        msg_qd.data.push_back( qd_out(i) );
+        
+    }
+}
 ```
 
 If you don't new operate here, you will have to define the class as:
@@ -173,10 +233,93 @@ If you don't new operate here, you will have to define the class as:
 RRMC::RRMC( ros::NodeHandle& nh): nh(nh), ik_vel(NULL){
     blah blah blah
 }
+// nh(nh) means in the runtime you give the variable a value of ros::NodeHandle nh
 RRMC::~RRMC(){ if( ik_vel) delete ik_vel;}
 ```
 
-cmd_vel by default means the twist variables
+ cmd_vel by default means the twist variables
+
+
+
+> **One important thing to metion:**
+>
+> When you try to get the kinematics chain of Universal Robot through getChain, always remember that UR has a chaotic order of joints. Typically the order should be: First Joint -> Second Joint -> Third Joint -> Forth Joint -> Fifth Joint -> Sixth Joint, from base to hand. But UR's order is like:  3 -> 2-> 1 -> 4 -> 5 -> 6
+
+
+
+### rrmc_node.cpp
+
+this is the main function that instaniate a object of class rrmc
+
+```cpp
+#include <rrmc/rrmc.hpp>
+
+int main ( int argc, char** argv){
+
+    ros::init( argc, argv, "rrmc");
+
+    ros::NodeHandle nh;
+
+    RRMC rrmc(nh);
+
+    ros::spin();
+
+    return 0;
+}
+```
+
+
+
+## 2.2 Insight about callback functions
+
+Like what we did in the rrmc.cpp, callback functions has a very clear working field.
+
+```cpp
+{
+    sub_vw = nh.subscribe("cmd_vel", 10, &RRMC::callback_vw, this); 
+    /*
+    when dealing with twist it's common to name twist as cmd_vel, 10 is the buffer
+    the point of subscribe is that it binds the callback function and this class together and 
+    it allows you to listen constantly to the topic you specified without getting stuck at this line of code
+    in other words, the other part of this class can run independently even though this nh.subscribe is running
+    Through this callback, we put what we get from cmd_vel to the parameter we defined for the callback_vw
+    Here we define the parameter as a "const geometry_msgs::Twist& vw", that means we put whatever we got into that parameter
+    So you gotta make sure the parameter you defined matches the type that you want to subtract 
+    */
+}
+void RRMC::callback_vw( const geometry_msgs::Twist& vw){
+
+    std::cout << vw << std::endl;
+    this->vw = vw;
+}
+
+```
+
+
+
+## 2.3 Run rrmc node
+
+First launch a simple control environment
+
+```bash
+roslaunch spacenav_node classic.launch
+```
+
+Then run our rrmc node and remap our control command to what the spacenav node need
+
+```bash
+ rosrun rrmc rrmc_node cmd_vel:=/spacenav/twist
+```
+
+ And Remember, **NEVER PRINT** the result to the screen when you are dealing with the real robot !!!!!!!!!!!!!!!!!
+
+
+
+## 2.4 Conclusion on KDL
+
+Most of the time, what we are doing is just grab data and generate some KDL objects. And then call the KDL member functions to do the  math, and then we publish the result back to ros to tell the robot about its kinematics state.
+
+
 
 
 
@@ -188,7 +331,16 @@ ros can publish several kinds of control messages, like control through trajecto
 $ rosrun rqt_controller_manager rqt_controller_manager
 ```
 
-
-
 If you wanna everything to run smoothly, never print anything to screen and ban all the visualization process
 
+
+
+## 3.1 How do we control a robot
+
+Through Joint velocities ?
+
+Through Joint torques ?
+
+Through Joint position ?
+
+All are possible through ros. But You can only use one at a time and other components will be get through different algorithms. For example, if you give the robot a target position and apply PID control. It will drive the robot to the position in an instance. 
