@@ -1,0 +1,13 @@
+<launch>
+    <include file="$(find ur_robot_driver)/launch/ur5_bringup.launch">
+        <arg name="robot_ip" value="172.22.22.2"/>
+        <arg name="kinematics_config" value="$(find ur_calibration)/etc/ex-ur5_calibration.yaml"/>
+        <arg name="stopped_controllers" value="scaled_pos_joint_traj_controller" />
+        <arg name="controllers" value="joint_group_pos_controller" />
+    </include>
+
+    <node pkg="rtt_ros" type="deployer" name="deployer" args="-s $(find assignment8)/scripts/demo.ops" output="screen" />
+</launch>
+
+<!-- roslaunch ur_robot_driver ur5_bringup.launch robot_ip:=172.22.22.2 [reverse_port:=REVERSE_PORT] kinematics_config:=$(rospack find ur_calibration)/etc/ex-ur5_calibration.yaml
+ -->

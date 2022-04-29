@@ -18,14 +18,3 @@ stream( "robot.Output_Port", ros.topic("/joint_group_pos_controller/command"))
 robot.configure()
 robot.start()
 
-var KDL.JntArray q=robot.GetJointPos()
-
-q[0] = 0.0
-q[1] = 0.0
-q[2] = 0.0
-q[3] = 0.0
-q[4] = 0.0
-q[5] = 0.0
-
-robot.SetJointPos( q )
-

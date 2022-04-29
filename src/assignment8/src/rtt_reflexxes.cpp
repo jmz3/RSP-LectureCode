@@ -47,18 +47,23 @@ bool rtt_reflexxes::startHook()
 
     for (int i = 0; i < 6; i++)
     {
-        ip->CurrentPositionVector->VecData[i] = 1.0;
+        ip->CurrentPositionVector->VecData[i] = 0.0;
         ip->CurrentVelocityVector->VecData[i] = 0.0;
         ip->CurrentAccelerationVector->VecData[i] = 0.0;
 
-        ip->MaxVelocityVector->VecData[i] = 1.0;
-        ip->MaxAccelerationVector->VecData[i] = 1.0;
+        ip->MaxVelocityVector->VecData[i] = 0.5;
+        ip->MaxAccelerationVector->VecData[i] = 0.1;
         ip->MaxJerkVector->VecData[i] = 10.0;
 
         ip->SelectionVector->VecData[i] = true;
-        ip->TargetPositionVector->VecData[i] = 1.0;
+        ip->TargetPositionVector->VecData[i] = 0.0;
         ip->TargetVelocityVector->VecData[i] = 0.0;
     }
+
+    ip->CurrentPositionVector->VecData[1] = -1.57;
+    ip->CurrentPositionVector->VecData[3] = -1.57;
+    ip->TargetPositionVector->VecData[1] = -1.57;
+    ip->TargetPositionVector->VecData[3] = -1.57;
 
     return true;
 }

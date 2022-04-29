@@ -26,3 +26,13 @@ references: http://docs.ros.org/en/indigo/api/tf/html/c++/classtf_1_1StampedTran
 
 ros::Time::now()
 
+
+
+you can use echo to dispaly the tf informations
+
+```bash
+rostopic echo /tf
+```
+
+
+

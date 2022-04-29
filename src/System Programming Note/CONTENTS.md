@@ -1,4 +1,4 @@
-RSP contents:
+SP contents:
 **************************
 **week1: Jan 24 - Jan 30**
 
