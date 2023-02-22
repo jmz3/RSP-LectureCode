@@ -10,6 +10,8 @@ ROS has a series of distros. There are cases when we installed multiple distros 
 
 The good thing is that the engineers who developed ROS actually have worried about that problem for us in advance. They provide a bash script to set up all the environment variables for every distro they publish and they call it as setup.bash.
 
+
+# Solution
 With that being said, to jump between different distro version, essentially you just need to type the source command to cover the previous one, i.e.
 ```bash
 $ source /opt/ros/YOUR_ROS_DISTRO_VERSION/setup.bash 
@@ -22,5 +24,3 @@ To fix that, you just simply use the export command like this:
 ```bash
 $ export ROS_DISTRO=noetic
 ```
-
-# Create Packages
