@@ -7,3 +7,5 @@
 # Create Packages
 To create ROS python package, we just need to catkin create a package that depend on rospy and then create a sub folder within the package folder.
 
+The name of the subfolder should be scripts, indicating that is for python scripts, which is different with the c++ source code.
+
