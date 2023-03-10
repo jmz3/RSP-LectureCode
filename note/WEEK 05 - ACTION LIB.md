@@ -28,7 +28,7 @@ uint32 total_dishes_cleaned
 float32 percent_complete
 ```
 
----
+
 
 ## 1.2 Create a message for a action file
 
@@ -64,7 +64,7 @@ uint8 POWER_OFF=2
 uint8 result_code
 ```
 
----
+
 
 ## 1.3 Create action file
 
@@ -175,8 +175,6 @@ int32 fdbk
 
 
 
-
----
 
 ## 1.4 Modify CMakeLists and package file
 
@@ -417,8 +415,6 @@ goal:
 ```
 
 
-
----
 
 explain the rostopic pub -1 command:
 

@@ -4,7 +4,6 @@
 <h5 align="right"> -- by Jeremy Zhang
 @ Johns Hopkins University</h5>
 
----
 
 [TOC]
 
@@ -106,7 +105,7 @@ rosrun rviz rviz # start rviz in another terminal to test whether the joint was 
 2. Second, add a "TF"  to see the published frames
 3. Third, add a "RobotModel" to display the geometry objects that are defined in the urdf
 
----
+
 
 
 
@@ -181,7 +180,7 @@ After running xacro -i command, xacro will be "complied" into the test.urdf, thi
 
 > **Keep in mind**: you need two macro files to complete the previous steps, first one is XXX.xacro and the second one is XXX.urdf.xacro, first file contains descriptions and the second one is more like a "CMAKELIST", compile the second one by typing "xacro -i" will generate a XXX.urdf file and this is the one that is used by ROS.
 
----
+
 
 ### 2.2 Combine and reuse through .urdf.xacro and xacro
 
@@ -227,7 +226,7 @@ rosrun joint_state_publisher_gui joint_state_publisher_gui # run this command in
 rosrun rviz rviz # start rviz in another terminal
 ```
 
----
+
 
 ### 2.3 Add a middle layer to pack those codes
 
@@ -381,7 +380,7 @@ Now, test-3.urdf will become:
 
 ```
 
----
+
 
 If you want to put several robots/links in different coordinates, you can modify the simple_robot-v3.urdf.xacro:
 
@@ -456,7 +455,7 @@ rosparam set robot_description -t test-3.urdf
 
 
 
----
+
 
 ## III. Apply launch file to this process
 
