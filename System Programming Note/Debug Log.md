@@ -56,7 +56,7 @@ fatal error: numpy/arrayobject.h: No such file or directory
 ```
 This can be solved by specifying the python directory
 ```bash
-catkin build -DPYTHON_EXECUTABLE=/usr/bin/python3 -DPYTHON_INCLUDE_DIR=/usr/include/python3.7m
+catkin build -DPYTHON_EXECUTABLE=/usr/bin/python3 -DPYTHON_INCLUDE_DIR=/usr/include/python3.8
 ```
-
+Note that here you have to modify the python3.7m to whatever version you have on your local env.
 

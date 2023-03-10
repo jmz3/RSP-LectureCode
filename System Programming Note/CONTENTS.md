@@ -1,16 +1,15 @@
-SP contents:
-**************************
-**week1: Jan 24 - Jan 30**
+# Contents:
+
+**week 1: Jan 24 - Jan 30**
 
 ROS introduction, Publisher
 
-**************************
-**week2: Jan 31 - Feb 06**
+**week 2: Jan 31 - Feb 06**
 
 Publisher, Self-made Meeage
 Cmakelist, Package file
 
-**************************
-**week3: Feb 07 - Feb 14**
+[**week 3: Feb 07 - Feb 14**](./System Programming Note/WEEK 03 - LAUNCH & ROSBAG .md)
 
 Launch File, ROSBAG
+

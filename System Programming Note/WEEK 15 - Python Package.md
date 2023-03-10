@@ -9,3 +9,11 @@ To create ROS python package, we just need to catkin create a package that depen
 
 The name of the subfolder should be scripts, indicating that is for python scripts, which is different with the c++ source code.
 
+
+
+```bash
+$ sudo chmod +x YOUR_NODE.py
+```
+
+
+
