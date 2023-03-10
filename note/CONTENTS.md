@@ -6,10 +6,10 @@ ROS introduction, Publisher
 
 **week 2: Jan 31 - Feb 06**
 
-Publisher, Self-made Meeage
+Publisher, Self-made Message
 Cmakelist, Package file
 
-[week 3: Feb 07 - Feb 14](note/WEEK 03 - LAUNCH & ROSBAG.md)
+[week 3: Feb 07 - Feb 14]("WEEK 03 - LAUNCH & ROSBAG.md")
 
 Launch File, ROSBAG
 
