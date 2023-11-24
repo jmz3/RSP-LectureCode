@@ -17,3 +17,13 @@ $ sudo chmod +x YOUR_NODE.py
 
 
 
+# Run Python Code from Terminal
+
+If you want to have fully supported python libraries, you need to source the rospy env in every terminal:
+
+```bash
+$ source /opt/ros/noetic/setup.bash
+$ rosrun YOUR_PACKAGE YOUR_CODE.py
+```
+
+Otherwise, there could be error messages saying some packages are not installed like rospy/rosbag/std_msgs/...
