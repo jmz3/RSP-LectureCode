@@ -543,11 +543,11 @@ Gazebo is not that complcated, it only provides some visualization process and i
 
 
 
-# Gazebo Pre-Defined Sensors
+# III. Gazebo Pre-Defined Sensors
 
 ## 3.1 Bumper
 
-#### Understanding Bumper Sensors in Gazebo
+### Understanding Bumper Sensors in Gazebo
 
 **Bumper Sensor Overview:**
 
@@ -555,7 +555,7 @@ Gazebo is not that complcated, it only provides some visualization process and i
 - **How It Works:** The sensor monitors a specified collision element (part of the robot or object model) and reports whenever this element comes into contact with another object. This data is crucial for tasks like obstacle avoidance, interaction with environments, and tactile feedback.
 - **Implementation:** In ROS-Gazebo integration, the bumper sensor is typically implemented through a plugin (e.g., `libgazebo_ros_bumper.so`) in the URDF/SDF model of the robot or object. It publishes data to a ROS topic, which can then be used by other ROS nodes for various computational tasks.
 
-#### Issue: Collision Element Naming in Gazebo SDF Generation and Its Effects
+### Issue: Collision Element Naming in Gazebo SDF Generation and Its Effects
 
 **Symptoms and Behaviors:**
 
@@ -592,3 +592,229 @@ gz sdf -p /path/to/your/model.urdf > /path/to/your/model.sdf
 
 
 **Conclusion:** The automatic renaming of elements during URDF to SDF conversion in Gazebo can lead to significant functional issues in ROS-Gazebo simulations. This behavior underscores the importance of thorough testing and validation of simulations, especially when integrating sensors and plugins. Recognizing the symptoms of this issue - such as malfunctioning sensors or plugins not behaving as expected - can be key in diagnosing and resolving problems stemming from naming discrepancies. Awareness of this conversion behavior is crucial for developers working with ROS and Gazebo to ensure accurate and reliable simulation outcomes.
+
+
+
+# IV. Example for Customized Plugin
+
+To create some customized plugin in gazebo, **it's better to define the robot using SDFormat instead of URDF**. In the end, GAZEBO loads the model by parsing SDF, even if your model is defined in URDF, GAZEBO will "translate" it to a SDF (which brings a lot of trouble!!!)
+
+## 1. Model Control Plugin and Contact Sensor
+
+So here is an example on how to build a robot using SDF from scratch with built-in sensor plugin and customized plugin.
+
+#### brain.sdf
+
+```xml
+<?xml version="1.0"?>
+<sdf version="1.6">
+    <model name="brain_model">
+        <plugin name="control_plugin_brain" filename="libcontrol_plugin_brain.so"> 
+        </plugin>
+        <!-- Base link -->
+        <link name="base">
+            <pose>0 0 0 0 0 0</pose>
+            <inertial>
+                <mass>1.0</mass>
+                <inertia>
+                    <ixx>1.0</ixx>
+                    <ixy>0.0</ixy>
+                    <ixz>0.0</ixz>
+                    <iyy>1.0</iyy>
+                    <iyz>0.0</iyz>
+                    <izz>1.0</izz>
+                </inertia>
+            </inertial>
+            <collision name="base_collision">
+                <geometry>
+                    <sphere>
+                        <radius>0.05</radius>
+                    </sphere>
+                </geometry>
+            </collision>
+            <visual name="base_visual">
+                <geometry>
+                    <sphere>
+                        <radius>0.05</radius>
+                    </sphere>
+                </geometry>
+                <material>
+                    <ambient>1 0 0 1</ambient>
+                </material>
+            </visual>
+            <!-- Control Plugin for base -->
+
+        </link>
+
+        <!-- Brain link -->
+        <link name="brain">
+            <pose>0 0 1 0 0 0</pose>
+            <inertial>
+                <mass>1.0</mass>
+                <inertia>
+                    <ixx>1.0</ixx>
+                    <ixy>0.0</ixy>
+                    <ixz>0.0</ixz>
+                    <iyy>1.0</iyy>
+                    <iyz>0.0</iyz>
+                    <izz>1.0</izz>
+                </inertia>
+            </inertial>
+            <collision name="brain_collision">
+                <geometry>
+                    <sphere>
+                        <radius>0.05</radius>
+                    </sphere>
+                </geometry>
+            </collision>
+            <visual name="brain_visual">
+                <geometry>
+                    <sphere>
+                        <radius>0.05</radius>
+                    </sphere>
+                </geometry>
+                <material>
+                    <ambient>1 0 0 1</ambient>
+                </material>
+            </visual>
+            <!-- Bumper Sensor -->
+            <sensor type="contact" name="brain_contact_sensor">
+                <contact>
+                    <collision>brain_collision</collision>
+                </contact>
+                <plugin name="gazebo_ros_bumper" filename="libgazebo_ros_bumper.so">
+                    <alwaysOn>true</alwaysOn>
+                    <bumperTopicName>/brain_contact</bumperTopicName>
+                    <frameName>world</frameName>
+                </plugin>
+            </sensor>
+        </link>
+
+        <!-- Fixed joint to connect brain to base -->
+        <joint name="base_to_brain" type="fixed">
+            <parent>base</parent>
+            <child>brain</child>
+        </joint>
+    </model>
+</sdf>
+```
+
+**NOTE** different plugin needs to be attached to different target objects, e.g.:
+
+In this file, the customized plugin `<plugin name="control_plugin_brain" filename="libcontrol_plugin_brain.so"> ` is attached to the model.
+
+The built-in contact sensor `<sensor type="contact" name="brain_contact_sensor">` is attached to a link.
+
+### brain_control.cpp
+
+```cpp
+#include <ros/ros.h>
+#include <geometry_msgs/Pose.h>
+#include <gazebo/gazebo.hh>          // for accessing all gazebo classes
+#include <gazebo/common/common.hh>   // for common fn in gazebo like WorldPlugin()
+#include <gazebo/physics/physics.hh> // for gazebo physics, to access -- WorldPtr
+#include <ignition/math/Vector3.hh>  // to access Vector3d() from ignition math class
+
+namespace gazebo
+{
+    class ModelMovePlugin : public ModelPlugin
+    {
+    public:
+        ModelMovePlugin() : ModelPlugin()
+        {
+            printf("Model Movement Plugin Created!\n");
+        }
+
+    public:
+        void Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
+        {
+
+            if (!ros::isInitialized())
+            {
+                ROS_FATAL_STREAM("A ROS node for Gazebo has not been initialized, unable to load plugin. "
+                                 << "Load the Gazebo system plugin 'libgazebo_ros_api_plugin.so' in the gazebo_ros package)");
+                return;
+            }
+
+            ROS_INFO("Model Movement Plugin Loaded!\n");
+
+            this->brain_ctrl_sub = this->brain_ctrl_node.subscribe("/brain_control_command", 10, &ModelMovePlugin::OnMsg, this);
+
+            this->model = _model;
+            this->world = this->model->GetWorld();
+
+            this->updateConnection = event::Events::ConnectWorldUpdateBegin(std::bind(&ModelMovePlugin::OnUpdate, this));
+        }
+
+    public:
+        void OnMsg(const geometry_msgs::PoseConstPtr &_msg)
+        {
+            this->brain_pose = *_msg;
+        }
+
+    public:
+        void OnUpdate()
+        {
+            this->model->SetWorldPose(ignition::math::Pose3d(
+                brain_pose.position.x,
+                brain_pose.position.y,
+                brain_pose.position.z,
+                brain_pose.orientation.w,
+                brain_pose.orientation.x,
+                brain_pose.orientation.y,
+                brain_pose.orientation.z));
+        }
+        // good pratices to declare pub/brain_ctrl_sub as data member
+        // reather than declaring them as local varibales which may cause issues
+    private:
+        ros::NodeHandle brain_ctrl_node;
+        ros::Subscriber brain_ctrl_sub;
+        physics::ModelPtr model;
+        physics::WorldPtr world;
+
+        geometry_msgs::Pose brain_pose;
+        event::ConnectionPtr updateConnection;
+    };
+    // Register plugin
+    GZ_REGISTER_MODEL_PLUGIN(ModelMovePlugin)
+}
+```
+
+gazebo itself can nest a rosnode called `gazebo` , which can be located in the rosnode list. This means if you create a rosnode object in a gazebo class, it by default has a name, you don't have to assign anything to it. (OF COURSE you can assign a name to it)
+
+### brain_upload.launch
+
+And the corresponding launch file
+
+```xml
+<launch>
+    <arg name="paused" default="false" />
+    <arg name="use_sim_time" default="true" />
+    <arg name="gui" default="true" />
+    <arg name="headless" default="false" />
+    <arg name="debug" default="false" />
+
+    <!-- We resume the logic in empty_world.launch, changing only the name of the world to be
+    launched -->
+    <include file="$(find gazebo_ros)/launch/empty_world.launch">
+        <arg name="world_name" value="$(find iiwa_gazebo)/worlds/iiwa.world" />
+        <arg name="debug" value="$(arg debug)" />
+        <arg name="gui" value="$(arg gui)" />
+        <arg name="paused" value="$(arg paused)" />
+        <arg name="use_sim_time" value="$(arg use_sim_time)" />
+        <arg name="headless" value="$(arg headless)" />
+    </include>
+    <!-- <group ns="brain"> -->
+    <!-- Define the name of the object-->
+    <arg name="object_name" default="brain" />
+
+    <param name="robot_description"
+        textfile="$(find brain_tracking)/urdf/brain_contact.urdf" />
+
+    <node name="spawn_brain" pkg="gazebo_ros" type="spawn_model"
+        args="-sdf -model $(arg object_name) -file $(find brain_tracking)/urdf/brain.sdf -x 0.0 -y 0.0 -z 0.0"
+        output="screen" />
+
+</launch>
+```
+
